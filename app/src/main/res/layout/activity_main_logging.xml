@@ -9,9 +9,18 @@
                 tools:context=".MainLoggingActivity">
 
     <Chronometer
+        android:id="@+id/timer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/chronometer"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:format="Yes. %s"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/timer"
+        android:layout_centerHorizontal="true"
+        android:text="History!"
+        android:onClick="goToHistory"/>
 
 </RelativeLayout>
