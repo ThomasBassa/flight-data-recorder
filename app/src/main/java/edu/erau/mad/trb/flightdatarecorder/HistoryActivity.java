@@ -1,12 +1,13 @@
 package edu.erau.mad.trb.flightdatarecorder;
 
+import android.app.ListActivity;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class HistoryActivity extends ActionBarActivity {
+public class HistoryActivity extends ListActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
