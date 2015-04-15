@@ -10,13 +10,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 
-/**
- * A fragment representing a list of Items.
- * <p/>
- * <p/>
+/** A fragment representing a list of Items.
+ * <p/> <p/>
  * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
- * interface.
- */
+ * interface. */
 public class HistoryFragment extends ListFragment {
 
     private OnFragmentInteractionListener mListener;
@@ -45,7 +42,6 @@ public class HistoryFragment extends ListFragment {
 
     }
 
-
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -68,7 +64,7 @@ public class HistoryFragment extends ListFragment {
     public void onListItemClick(ListView l, View v, int position, long id) {
         super.onListItemClick(l, v, position, id);
 
-        if (null != mListener) {
+        if(null != mListener) {
             // Notify the active callbacks interface (the activity, if the
             // fragment is attached to one) that an item has been selected.
             mListener.onFragmentInteraction(dummyStrings[position]);
