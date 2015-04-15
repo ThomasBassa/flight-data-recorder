@@ -12,15 +12,42 @@
         android:id="@+id/timer"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:format="Yes. %s"/>
+        android:layout_centerInParent="true"/>
 
     <Button
+        android:id="@+id/history"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@id/timer"
         android:layout_centerHorizontal="true"
         android:text="History!"
         android:onClick="goToHistory"/>
+    <Button
+        android:id="@+id/reset"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/history"
+        android:layout_centerHorizontal="true"
+        android:text="reset"
+        android:onClick="resetTimer"/>
+
+    <Button
+        android:id="@+id/start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/history"
+        android:layout_toLeftOf="@id/reset"
+        android:text="@string/start"
+        android:onClick="startTimer"/>
+
+    <Button
+        android:id="@+id/stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/history"
+        android:layout_toRightOf="@id/reset"
+        android:text="@string/stop"
+        android:onClick="stopTimer"/>
+
 
 </RelativeLayout>
