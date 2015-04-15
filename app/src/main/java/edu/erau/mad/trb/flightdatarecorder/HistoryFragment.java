@@ -1,8 +1,8 @@
 package edu.erau.mad.trb.flightdatarecorder;
 
 import android.app.Activity;
-import android.os.Bundle;
 import android.app.ListFragment;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,8 +24,38 @@ public class HistoryFragment extends ListFragment {
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
      */
-    public HistoryFragment() {
+    public HistoryFragment() { }
+
+    /* Code snippet: Multiple selection adapter (alerts is a ListView obj)
+    //Populate the list
+    //Per Stansbury
+    ArrayAdapter<String> alertAdapter = new ArrayAdapter<String>(
+            this, android.R.layout.simple_list_item_multiple_choice, alertChoices);
+
+    alerts.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE);
+    alerts.setAdapter(alertAdapter);
+    */
+
+    /* Code snippet: Read multiple selection (alerts is a ListView obj)
+    //Get the selected alert options as CSV, sort of
+    //Almost Stansbury's list concatenation, except with StringBuilder
+    final SparseBooleanArray alertSelections = alerts.getCheckedItemPositions();
+
+    final StringBuilder selectedAlerts = new StringBuilder();
+    for (int i=0; i < alertSelections.size(); i++) {
+        if (alertSelections.valueAt(i)) {
+            //get selected item’s string
+            selectedAlerts.append(
+                    alerts.getAdapter().getItem(alertSelections.keyAt(i)).toString());
+
+            selectedAlerts.append(", ");
+        }
     }
+    //Delete trailing comma separator (2 chars long)
+    if(selectedAlerts.length() >= 2) //Make sure we have something to delete...
+        selectedAlerts.delete(selectedAlerts.length() - 2, selectedAlerts.length());
+
+    */
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -39,7 +69,6 @@ public class HistoryFragment extends ListFragment {
         // TODO: Change Adapter to display your content
         setListAdapter(new ArrayAdapter<String>(getActivity(),
                 android.R.layout.simple_list_item_1, android.R.id.text1, dummyStrings));
-
     }
 
     @Override
