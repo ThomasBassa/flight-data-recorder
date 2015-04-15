@@ -11,7 +11,7 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
     /** Version of the database schema, used in onCreate/onUpgrade */
     private final static int VERSION_NO = 1;
     /** Database file name used within the Android file system (not seen much) */
-    private final static String DB_NAME = "TODO.db"; //TODO rename database
+    private final static String DB_NAME = "FlightLogs.db";
 
     /** Name of the table of orientation records. Its columns follow. */
     public final static String TABLE_FLIGHT_DATA = "FlightOrientationData";
