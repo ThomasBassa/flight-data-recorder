@@ -4,9 +4,7 @@ package edu.erau.mad.trb.flightdatarecorder;
  * by Thomas Bassa
  * A Java class to manage the position & orientation of an Android device. */
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -23,16 +21,6 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
 
     /** Location provider. TODO Use GPS or Google location services */
     private static final String LOC_PROVIDER = LocationManager.NETWORK_PROVIDER;
-
-    //TODO Lat/long format needs to be ddd° mm’ ss’’
-    private static final String LAT_LONG_FORMAT = "%2.4f %s°";
-
-    /* TODO remove constants re: storage
-    private static final String LATI_STORAGE = "edu.erau.mad.sensormapper.LATI";
-    private static final String LONGI_STORAGE = "edu.erau.mad.sensormapper.LONGI";
-    private static final float LEHMAN_LATI = 29.1893f;
-    private static final float LEHMAN_LONGI = -81.0470f;
-    */
 
     //Sensors
     private SensorManager sensorManager;
@@ -59,9 +47,9 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     // https://developer.android.com/guide/topics/data/data-storage.html
     //private SharedPreferences prefs;
 
-    public DevicePosAndOrient(Activity hostActivity) {
+    public DevicePosAndOrient(Context hostContext) {
         //Get the sensor manager & sensors
-        sensorManager = (SensorManager) hostActivity.getSystemService(Context
+        sensorManager = (SensorManager) hostContext.getSystemService(Context
                 .SENSOR_SERVICE);
 
         senseMag = sensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -69,17 +57,8 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
         if(senseMag != null && senseAccel != null) sensorsPresent = true;
 
         //Location management
-        locationManager = (LocationManager) hostActivity.getSystemService(Context
+        locationManager = (LocationManager) hostContext.getSystemService(Context
                 .LOCATION_SERVICE);
-
-        /* TODO remove last known init
-        //Get a handle to prefs data for last known location
-        prefs = hostActivity.getPreferences(Context.MODE_PRIVATE);
-
-        //Restore the last known loc data, or use Lehman coords.
-        lati = prefs.getFloat(LATI_STORAGE, LEHMAN_LATI);
-        longi = prefs.getFloat(LONGI_STORAGE, LEHMAN_LONGI);
-        */
     }
 
     /** Begin listening to sensors & location data */
@@ -91,19 +70,10 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
         locationManager.requestLocationUpdates(LOC_PROVIDER, MS_PER_SECOND, 1f, this);
     }
 
-    /** Stop listening to sensors & location, to save battery
-     * Also save the last known location (to the app) */
+    /** Stop listening to sensors & location, to save battery */
     public void stopListening() {
         sensorManager.unregisterListener(this);
         locationManager.removeUpdates(this);
-
-        /* TODO remove last known save
-        //Save last known loc
-        SharedPreferences.Editor save = prefs.edit();
-        save.putFloat(LATI_STORAGE, (float) lati);
-        save.putFloat(LONGI_STORAGE, (float) longi);
-        save.apply();
-        */
     }
 
     /** Get the last known latitude of the device, signed. */
@@ -120,14 +90,26 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
      * to four decimal places, referencing north or south rather than a sign. */
     public String getNiceLatitude() {
         String latiCompass = lati >= 0f ? "N" : "S";
-        return String.format(LAT_LONG_FORMAT, Math.abs(lati), latiCompass);
+        return formatDecDegToDegMinSec(Math.abs(lati), latiCompass);
     }
 
     /** Get a formatted numeric string with the longitude,
      * to four decimal places, referencing east or west rather than a sign. */
     public String getNiceLongitude() {
         String longiCompass = longi >= 0f ? "E" : "W";
-        return String.format(LAT_LONG_FORMAT, Math.abs(longi), longiCompass);
+        return formatDecDegToDegMinSec(Math.abs(longi), longiCompass);
+    }
+
+    private static String formatDecDegToDegMinSec(double decDegrees,
+                                                  String compass) {
+        //https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
+        //Each of these operations is flooring, so casting works perfectly.
+        int degrees = (int) decDegrees;
+        int minutes = (int) (60 * (decDegrees - degrees));
+        int seconds = (int) (3600 * (decDegrees - degrees - (minutes / 60)));
+
+        return String.format("%03d° %02d’ %02d’’ %s", degrees, minutes, seconds,
+                compass);
     }
 
     /** Get the azimuth (bearing) of the device in degrees.
