@@ -90,7 +90,8 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         //creationContext = context;
     }
 
-    /** Get a Cursor for all known flights in the flight list. */
+    /** Get a Cursor for all known flights in the flight list,
+     * where the flights are pre-sorted in descending order. */
     public Cursor getAllFlights() {
         SQLiteDatabase db = getReadableDatabase();
         //Essentially SELECT * FROM flightList ORDER BY start DESC with some renaming
@@ -102,6 +103,7 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         return db.rawQuery(query, null);
     }
 
+    //TODO Temporary method to test list ID callbacks.
     public long getFlightStart(long id) {
         final String query = String.format("SELECT %s FROM %s WHERE %s=%d",
                 COL_START_REAL, TABLE_FLIGHT_LIST, COL_FLIGHT_ID, id);

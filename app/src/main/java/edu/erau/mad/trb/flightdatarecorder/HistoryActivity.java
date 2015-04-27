@@ -8,7 +8,7 @@ import android.widget.Toast;
 
 
 public class HistoryActivity extends ActionBarActivity implements
-        HistoryFragment.OnFragmentInteractionListener {
+        HistoryFragment.ListItemClickListener {
 
     private FlightLogDatabase database;
 
@@ -43,7 +43,7 @@ public class HistoryActivity extends ActionBarActivity implements
     }
 
     @Override
-    public void onFragmentInteraction(long id) {
+    public void onFragmentListClick(long id) {
         Toast.makeText(this, String.format("This flight started at %tD %<tT",
                         database.getFlightStart(id)),
                 Toast.LENGTH_SHORT).show();

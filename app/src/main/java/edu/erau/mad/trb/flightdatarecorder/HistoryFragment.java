@@ -9,18 +9,16 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 
 
-/** A fragment representing a list of Items.
- * <p/> <p/>
- * Activities containing this fragment MUST implement the {@link OnFragmentInteractionListener}
- * interface. */
-public class HistoryFragment extends ListFragment {
+//TODO Document HistoryFragment fully
+public class HistoryFragment extends ListFragment implements
+        SimpleCursorAdapter.ViewBinder {
 
-    private OnFragmentInteractionListener mListener;
+    private ListItemClickListener mListener;
 
     private FlightLogDatabase database;
-    private Cursor flightsCursor;
 
 
     /** Mandatory empty constructor for the fragment manager to instantiate the
@@ -63,11 +61,11 @@ public class HistoryFragment extends ListFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if(activity instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) activity;
+        if(activity instanceof ListItemClickListener) {
+            mListener = (ListItemClickListener) activity;
         } else {
             throw new ClassCastException(activity.toString()
-                    + " must implement OnFragmentInteractionListener");
+                    + " must implement ListItemClickListener");
         }
         database = FlightLogDatabase.getInstance(activity);
     }
@@ -76,12 +74,14 @@ public class HistoryFragment extends ListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        flightsCursor = database.getAllFlights();
+        Cursor flightsCursor = database.getAllFlights();
         final String[] fromCols = {FlightLogDatabase.COL_START_REAL,
                 FlightLogDatabase.COL_END_REAL};
+        //TODO Implement a better layout, multiple selection layout
         final int[] toViews = {android.R.id.text1, android.R.id.text2};
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.two_line_list_item, flightsCursor, fromCols, toViews, 0);
+        adapter.setViewBinder(this);
         setListAdapter(adapter);
     }
 
@@ -103,11 +103,28 @@ public class HistoryFragment extends ListFragment {
         super.onListItemClick(l, v, position, id);
 
         if(mListener != null) {
-            mListener.onFragmentInteraction(id);
+            mListener.onFragmentListClick(id);
         }
     }
 
-    /**
+    //Implementation of ViewBinder interface. Used to populate the ListView
+    // sub-elements with human-readable times.
+    @Override
+    public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+        boolean handled = false;
+        if(columnIndex == cursor.getColumnIndex(FlightLogDatabase.COL_START_REAL)
+                || columnIndex == cursor.getColumnIndex(FlightLogDatabase.COL_END_REAL)) {
+            if(view instanceof TextView) {
+                final TextView text = (TextView) view;
+                text.setText(String.format("%ta %<tb %<te %<tY - %<tr",
+                        cursor.getLong(columnIndex)));
+                handled = true;
+            }
+        }
+        return handled;
+    }
+
+    /** (Auto-generated docs.)
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
      * to the activity and potentially other fragments contained in that
@@ -117,8 +134,8 @@ public class HistoryFragment extends ListFragment {
      * "http://developer.android.com/training/basics/fragments/communicating.html"
      * >Communicating with Other Fragments</a> for more information.
      */
-    public interface OnFragmentInteractionListener {
-        public void onFragmentInteraction(long flightID);
+    public interface ListItemClickListener {
+        public void onFragmentListClick(long flightID);
     }
 
 }
