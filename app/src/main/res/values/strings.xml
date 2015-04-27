@@ -16,4 +16,6 @@
     <string name="action_reset">Reset</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_history">Flight History</string>
+
+    <string name="noHistory">No flights recorded yet.</string>
 </resources>
