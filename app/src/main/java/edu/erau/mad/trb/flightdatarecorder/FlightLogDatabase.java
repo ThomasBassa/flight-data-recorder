@@ -1,8 +1,11 @@
 package edu.erau.mad.trb.flightdatarecorder;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+
+import java.util.Random;
 
 /** Database class for the storage of all flight data. Utilizes the
  * SQLiteOpenHelper to accomplish the management of the database. */
@@ -84,17 +87,78 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
     /* Called when the database is created for the first time. */
     @Override
     public void onCreate(SQLiteDatabase db) {
-        //TODO remake the tables...
-        /*
-        final String create = "CREATE TABLE " + TABLE_FLIGHT_DATA + "(" +
-                //COL_DELTAT + " INTEGER PRIMARY KEY, " +
+        String create = "CREATE TABLE " + TABLE_FLIGHT_LIST + "(" +
+                COL_FLIGHT_ID + " INTEGER PRIMARY KEY, " +
+                COL_START_REAL + " INTEGER NOT NULL, " +
+                COL_END_REAL + " INTEGER);";
+        db.execSQL(create);
+
+        create = "CREATE TABLE " + TABLE_FLIGHT_DATA + "(" +
+                //Apply foreign key constraint; flight data id -> flight list id
+                COL_FLIGHT_ID + " INTEGER NOT NULL REFERENCES " +
+                TABLE_FLIGHT_LIST + "(" + COL_FLIGHT_ID + ")" +
+                "ON UPDATE RESTRICT ON DELETE CASCADE, " +
+
+                COL_DELTA_T_MS + " INTEGER NOT NULL, " +
                 COL_ROLL + " REAL, " +
                 COL_PITCH + " REAL, " +
+                COL_YAW + " REAL, " +
                 COL_LATI + " REAL, " +
                 COL_LONGI + " REAL, " +
-                COL_YAW + " REAL)";
+                COL_ALT + " REAL, " +
+                //All entries should have a unique combination of ID and delta t
+                "UNIQUE(" + COL_FLIGHT_ID + ", " + COL_DELTA_T_MS + "));";
         db.execSQL(create);
-        */
+
+        //TODO remove temporary testing inserts
+        ContentValues listRow = new ContentValues(2);
+        final long now = System.currentTimeMillis();
+        //From 250s ago to 25s ago, delta 225s
+        listRow.put(COL_FLIGHT_ID, 1);
+
+        listRow.put(COL_START_REAL, now - 2500000L);
+        listRow.put(COL_END_REAL, now - 250000L);
+        db.insert(TABLE_FLIGHT_LIST, null, listRow);
+        //10s ago to 5s ago, delta 5s
+        listRow.put(COL_FLIGHT_ID, 2);
+        listRow.put(COL_START_REAL, now - 100000L);
+        listRow.put(COL_END_REAL, now - 5000L);
+        db.insert(TABLE_FLIGHT_LIST, null, listRow);
+
+        ContentValues dataRow = new ContentValues(7);
+        final Random gen = new Random();
+        final double baseLati = gen.nextDouble() * 100.0;
+        final double baseLongi = gen.nextDouble() * 100.0;
+        dataRow.put(COL_FLIGHT_ID, 1);
+        for(long deltat = 0; deltat < 2250000L; deltat += 1000) {
+            dataRow.put(COL_DELTA_T_MS, deltat);
+
+            dataRow.put(COL_ROLL, gen.nextDouble() * 360.0);
+            dataRow.put(COL_PITCH, gen.nextDouble() * 360.0);
+            dataRow.put(COL_YAW, gen.nextDouble() * 360.0);
+
+            dataRow.put(COL_LATI, baseLati + (deltat / 1000));
+            dataRow.put(COL_LONGI, baseLongi + (deltat / 1000));
+            dataRow.put(COL_ALT, gen.nextDouble() * 100.0);
+
+            db.insert(TABLE_FLIGHT_DATA, null, dataRow);
+        }
+
+        dataRow.put(COL_FLIGHT_ID, 2);
+        for(long deltat = 0; deltat < 5000L; deltat += 1000) {
+            dataRow.put(COL_DELTA_T_MS, deltat);
+
+            dataRow.put(COL_ROLL, gen.nextDouble() * 360.0);
+            dataRow.put(COL_PITCH, gen.nextDouble() * 360.0);
+            dataRow.put(COL_YAW, gen.nextDouble() * 360.0);
+
+            dataRow.put(COL_LATI, baseLati - (deltat / 1000));
+            dataRow.put(COL_LONGI, baseLongi - (deltat / 1000));
+            dataRow.put(COL_ALT, gen.nextDouble() * 100.0);
+
+            db.insert(TABLE_FLIGHT_DATA, null, dataRow);
+        }
+        //End of temporary inserts.
     }
 
     /* Called when the database schema increases in version number */
