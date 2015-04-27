@@ -2,6 +2,8 @@ package edu.erau.mad.trb.flightdatarecorder;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -21,6 +23,10 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
 
     /** The ID of the flight, as seen in the flight list table. */
     public final static String COL_FLIGHT_ID = "flightId";
+
+    /** CursorAdapters require a column named _id, this is a stand in for the
+     * flight id. */
+    public final static String COL_FLIGHT_ID_ALIAS = "_id";
 
     /** How many milliseconds have passed since the start of this flight */
     public final static String COL_DELTA_T_MS = "deltaTMillis";
@@ -82,6 +88,24 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
     private FlightLogDatabase(Context context) {
         super(context, DB_NAME, null, VERSION_NO);
         //creationContext = context;
+    }
+
+    /** Get a Cursor for all known flights in the flight list. */
+    public Cursor getAllFlights() {
+        SQLiteDatabase db = getReadableDatabase();
+        //Essentially SELECT * FROM flightList ORDER BY start DESC with some renaming
+        final String query = String.format("SELECT %s AS %s, %s, " +
+                "%s FROM %s ORDER BY %s DESC", COL_FLIGHT_ID,
+                COL_FLIGHT_ID_ALIAS, COL_START_REAL, COL_END_REAL,
+                TABLE_FLIGHT_LIST, COL_START_REAL);
+
+        return db.rawQuery(query, null);
+    }
+
+    public long getFlightStart(long id) {
+        final String query = String.format("SELECT %s FROM %s WHERE %s=%d",
+                COL_START_REAL, TABLE_FLIGHT_LIST, COL_FLIGHT_ID, id);
+        return DatabaseUtils.longForQuery(getReadableDatabase(), query, null);
     }
 
     /* Called when the database is created for the first time. */
