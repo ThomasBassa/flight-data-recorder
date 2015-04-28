@@ -95,10 +95,12 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
     public Cursor getAllFlights() {
         SQLiteDatabase db = getReadableDatabase();
         //Essentially SELECT * FROM flightList ORDER BY start DESC with some renaming
-        final String query = String.format("SELECT %s AS %s, %s, " +
-                "%s FROM %s ORDER BY %s DESC", COL_FLIGHT_ID,
-                COL_FLIGHT_ID_ALIAS, COL_START_REAL, COL_END_REAL,
-                TABLE_FLIGHT_LIST, COL_START_REAL);
+        final String query = String.format("SELECT %s AS %s, %s, %s FROM %s " +
+                        "ORDER BY %s DESC",
+                COL_FLIGHT_ID, COL_FLIGHT_ID_ALIAS,
+                COL_START_REAL, COL_END_REAL,
+                TABLE_FLIGHT_LIST,
+                COL_START_REAL);
 
         return db.rawQuery(query, null);
     }
@@ -106,11 +108,27 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
     //TODO Temporary method to test list ID callbacks.
     public long getFlightStart(long id) {
         final String query = String.format("SELECT %s FROM %s WHERE %s=%d",
-                COL_START_REAL, TABLE_FLIGHT_LIST, COL_FLIGHT_ID, id);
+                COL_START_REAL,
+                TABLE_FLIGHT_LIST,
+                COL_FLIGHT_ID, id);
         return DatabaseUtils.longForQuery(getReadableDatabase(), query, null);
     }
 
-    //TODO mechanism to get all points for one flight
+    /** Get a Cursor for all latitudes, longitudes, and delta times associated
+     * with a given flight ID.
+     * @param flightID the ID of the flight
+     * @return a Cursor with the given info */
+    public Cursor getFlightPositionsForFlight(long flightID) {
+        SQLiteDatabase db = getReadableDatabase();
+
+        final String query = String.format("SELECT %s, %s, %s FROM %s " +
+                        "WHERE %s=%d ORDER BY %s ASC",
+                COL_DELTA_T_MS, COL_LATI, COL_LONGI,
+                TABLE_FLIGHT_DATA,
+                COL_FLIGHT_ID, flightID,
+                COL_DELTA_T_MS);
+        return db.rawQuery(query, null);
+    }
 
     //TODO update database mechanism (devicepos&orient object?)
 
@@ -143,10 +161,10 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         //TODO remove temporary testing inserts
         ContentValues listRow = new ContentValues(2);
         final long now = System.currentTimeMillis();
-        //From 250s ago to 25s ago, delta 225s
+        //From 100s ago to 25s ago, delta 75s
         listRow.put(COL_FLIGHT_ID, 1);
 
-        listRow.put(COL_START_REAL, now - 2500000L);
+        listRow.put(COL_START_REAL, now - 1000000L);
         listRow.put(COL_END_REAL, now - 250000L);
         db.insert(TABLE_FLIGHT_LIST, null, listRow);
         //10s ago to 5s ago, delta 5s
@@ -157,10 +175,10 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
 
         ContentValues dataRow = new ContentValues(7);
         final Random gen = new Random();
-        final double baseLati = gen.nextDouble() * 100.0;
-        final double baseLongi = gen.nextDouble() * 100.0;
+        final double baseLati = gen.nextDouble() * 25.0;
+        final double baseLongi = gen.nextDouble() * 25.0;
         dataRow.put(COL_FLIGHT_ID, 1);
-        for(long deltat = 0; deltat < 2250000L; deltat += 1000) {
+        for(long deltat = 0; deltat < 70000L; deltat += 1000) {
             dataRow.put(COL_DELTA_T_MS, deltat);
 
             dataRow.put(COL_ROLL, gen.nextDouble() * 360.0);

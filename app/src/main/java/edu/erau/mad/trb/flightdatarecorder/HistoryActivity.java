@@ -1,5 +1,6 @@
 package edu.erau.mad.trb.flightdatarecorder;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -55,9 +56,8 @@ public class HistoryActivity extends ActionBarActivity implements
 
     @Override
     public void onFragmentListClick(long id) {
-        //TODO Launch the details view instead.
-        Toast.makeText(this, String.format("This flight started at %tD %<tT",
-                        database.getFlightStart(id)),
-                Toast.LENGTH_SHORT).show();
+        Intent showDetails = new Intent(this, FlightDetailActivity.class);
+        showDetails.putExtra(FlightDetailActivity.INTENT_ID_INFO, id);
+        startActivity(showDetails);
     }
 }
