@@ -34,15 +34,23 @@ public class HistoryActivity extends ActionBarActivity implements
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch(item.getItemId()) {
+            case R.id.action_export:
+                //TODO switch HistoryFragment to multiple-select mode...
+                Toast.makeText(this, "Export will be implemented.",
+                        Toast.LENGTH_SHORT).show();
+                return true;
+            //TODO case for "delete some"
+            case R.id.action_delete_all:
+                //TODO Reset the database
+                //Pop dialog to confirm database wipe
+                //If confirmed, do it
+                Toast.makeText(this, "Delete all will be implemented.",
+                        Toast.LENGTH_SHORT).show();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        //TODO implement menu options for export, delete (opt), and delete all
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override
