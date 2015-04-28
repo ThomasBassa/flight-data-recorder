@@ -2,7 +2,6 @@ package edu.erau.mad.trb.flightdatarecorder;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.graphics.Point;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -18,6 +17,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.concurrent.Semaphore;
 
 //TODO Document FlightDetailActivity
 public class FlightDetailActivity extends FragmentActivity {
@@ -107,11 +107,19 @@ public class FlightDetailActivity extends FragmentActivity {
 
         private LatLngBounds bounds;
 
-        private Point screenSize;
+        private Semaphore mapWait = new Semaphore(0);
 
         public MapDatabaseReader(long id, GoogleMap googleMap, Context c) {
             flightID = id;
             map = googleMap;
+
+            //Wait for the map to finish loading.
+            map.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+                @Override
+                public void onMapLoaded() {
+                    mapWait.release();
+                }
+            });
 
             database = FlightLogDatabase.getInstance(c);
         }
@@ -153,6 +161,11 @@ public class FlightDetailActivity extends FragmentActivity {
             }
             bounds = boundBuilder.build();
 
+            //Wait for the map to finish loading...
+            try {
+                mapWait.acquire();
+            } catch (InterruptedException ignored) {}
+
             return coords;
         }
 
@@ -166,10 +179,9 @@ public class FlightDetailActivity extends FragmentActivity {
         //Runs on UI thread after task completes
         @Override
         protected void onPostExecute(ArrayList<LatLng> latLngs) {
-            map.addPolyline(new PolylineOptions().addAll(latLngs).width(5.0f));
-            //15 is the # pixels padding; arbitrary
-            //TODO this has a tendency to crash due to the map not being loaded yet
-            map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 15));
+            map.addPolyline(new PolylineOptions().addAll(latLngs).width(3.0f));
+            //20 is the # pixels padding; arbitrary
+            map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 20));
         }
     }
 }
