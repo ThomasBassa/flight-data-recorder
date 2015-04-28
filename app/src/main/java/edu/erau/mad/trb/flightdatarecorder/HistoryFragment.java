@@ -56,8 +56,10 @@ public class HistoryFragment extends ListFragment implements
 
     */
 
-    //Fragment lifecycle methods
+    //TODO implement multiple selection lists for delete & export
 
+    //Fragment lifecycle methods
+    //TODO close the cursors you're using, with lifecycle methods
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);

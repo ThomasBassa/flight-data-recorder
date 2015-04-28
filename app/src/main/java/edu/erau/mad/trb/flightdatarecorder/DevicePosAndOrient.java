@@ -19,8 +19,8 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     private static final int US_PER_SECOND = 1000000;
     private static final long MS_PER_SECOND = 1000L;
 
-    /** Location provider. TODO Use GPS or Google location services */
-    private static final String LOC_PROVIDER = LocationManager.NETWORK_PROVIDER;
+    /** Location provider. */
+    private static final String LOC_PROVIDER = LocationManager.GPS_PROVIDER;
 
     //Sensors
     private SensorManager sensorManager;
@@ -40,13 +40,11 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     //Location
     private LocationManager locationManager;
 
-    private double lati;
-    private double longi;
+    private double lati = 0.0;
+    private double longi = 0.0;
 
-    //TODO remove Last known location handling
-    // https://developer.android.com/guide/topics/data/data-storage.html
-    //private SharedPreferences prefs;
-
+    /** Create a DevicePosAndOrient object, using the Context to retrieve
+     * system services (sensors, location) */
     public DevicePosAndOrient(Context hostContext) {
         //Get the sensor manager & sensors
         sensorManager = (SensorManager) hostContext.getSystemService(Context
@@ -87,19 +85,24 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     }
 
     /** Get a formatted numeric string with the latitude,
-     * to four decimal places, referencing north or south rather than a sign. */
+     * referencing north or south rather than a sign. */
     public String getNiceLatitude() {
         String latiCompass = lati >= 0f ? "N" : "S";
         return formatDecDegToDegMinSec(Math.abs(lati), latiCompass);
     }
 
     /** Get a formatted numeric string with the longitude,
-     * to four decimal places, referencing east or west rather than a sign. */
+     * referencing east or west rather than a sign. */
     public String getNiceLongitude() {
         String longiCompass = longi >= 0f ? "E" : "W";
         return formatDecDegToDegMinSec(Math.abs(longi), longiCompass);
     }
 
+    /** Format a decimal geographic coordinate in ddd° mm’ ss’’ C format,
+     * aka degrees, minutes, and seconds, with a compass letter.
+     * @param decDegrees a decimal geographic coordinate (positive lati/longi)
+     * @param compass a letter for the compass heading of this coordinate
+     * @return a formatted string in the form of ddd° mm’ ss’’ C */
     private static String formatDecDegToDegMinSec(double decDegrees,
                                                   String compass) {
         //https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
@@ -185,6 +188,7 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {}
 
+    //TODO should probably account for provider enable/disable...
     @Override
     public void onProviderEnabled(String provider) {}
 

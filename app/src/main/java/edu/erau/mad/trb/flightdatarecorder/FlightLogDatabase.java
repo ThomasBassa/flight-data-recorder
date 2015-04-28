@@ -110,6 +110,10 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         return DatabaseUtils.longForQuery(getReadableDatabase(), query, null);
     }
 
+    //TODO mechanism to get all points for one flight
+
+    //TODO update database mechanism (devicepos&orient object?)
+
     /* Called when the database is created for the first time. */
     @Override
     public void onCreate(SQLiteDatabase db) {

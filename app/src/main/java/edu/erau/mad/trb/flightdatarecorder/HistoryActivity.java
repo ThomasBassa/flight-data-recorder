@@ -12,6 +12,8 @@ public class HistoryActivity extends ActionBarActivity implements
 
     private FlightLogDatabase database;
 
+    //TODO handle to its contained HistoryFragment
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,12 +40,14 @@ public class HistoryActivity extends ActionBarActivity implements
         if (id == R.id.action_settings) {
             return true;
         }
+        //TODO implement menu options for export, delete (opt), and delete all
 
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     public void onFragmentListClick(long id) {
+        //TODO Launch the details view instead.
         Toast.makeText(this, String.format("This flight started at %tD %<tT",
                         database.getFlightStart(id)),
                 Toast.LENGTH_SHORT).show();
