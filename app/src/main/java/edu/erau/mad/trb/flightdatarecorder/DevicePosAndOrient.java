@@ -1,6 +1,6 @@
 package edu.erau.mad.trb.flightdatarecorder;
-/* TODO Redocument DevicePosAndOrient
- * SE395A
+/* DevicePosAndOrient.java
+ * SE395A Final Project
  * by Thomas Bassa
  * A Java class to manage the position & orientation of an Android device. */
 
@@ -87,13 +87,26 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     /** Get a formatted numeric string with the latitude,
      * referencing north or south rather than a sign. */
     public String getNiceLatitude() {
-        String latiCompass = lati >= 0f ? "N" : "S";
-        return formatDecDegToDegMinSec(Math.abs(lati), latiCompass);
+        return formatLatitude(lati);
     }
 
     /** Get a formatted numeric string with the longitude,
      * referencing east or west rather than a sign. */
     public String getNiceLongitude() {
+        return formatLongitude(longi);
+    }
+
+    /** Format a latitude in ddd° mm’ ss’’ C format,
+     * aka degrees, minutes, and seconds, with a compass letter. */
+    public String formatLatitude(double lati) {
+        String latiCompass = lati >= 0f ? "N" : "S";
+        return formatDecDegToDegMinSec(Math.abs(lati), latiCompass);
+    }
+
+
+    /** Format a longitude in ddd° mm’ ss’’ C format,
+     * aka degrees, minutes, and seconds, with a compass letter. */
+    public String formatLongitude(double longi) {
         String longiCompass = longi >= 0f ? "E" : "W";
         return formatDecDegToDegMinSec(Math.abs(longi), longiCompass);
     }
@@ -121,7 +134,6 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
         return Math.toDegrees(orientValues[0]);
     }
 
-
     /** Get the pitch of the device in degrees.
      * @see android.hardware.SensorManager#getOrientation(float[], float[]) */
     public double getPitch() {
@@ -134,10 +146,9 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
         return Math.toDegrees(orientValues[2]);
     }
 
-    /** Take a degrees value and format it nicely. */
+    /** Take a degrees value for roll/pitch/yaw and format it nicely. */
     public static String formatDegValue(double value) {
-        //TODO Roll, pitch, and yaw are all to 2 decimal place precision
-        return String.format("% 3.3f°", value);
+        return String.format("% 3.2f°", value);
     }
 
     //Methods implemented from SensorEventListener
