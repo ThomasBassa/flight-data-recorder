@@ -121,11 +121,19 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
      * @return a formatted string in the form of ddd° mm’ ss’’ C */
     private static String formatDecDegToDegMinSec(double decDegrees,
                                                   String compass) {
-        //https://en.wikipedia.org/wiki/Geographic_coordinate_conversion
         //Each of these operations is flooring, so casting works perfectly.
+
+        /* http://geography.about.com/library/howto/htdegrees.htm
+        The whole units of degrees will remain the same (i.e. in 121.135° longitude, start with 121°).
+        Multiply the decimal by 60 (i.e. .135 * 60 = 8.1).
+        The whole number becomes the minutes (8').
+        Take the remaining decimal and multiply by 60. (i.e. .1 * 60 = 6).
+        The resulting number becomes the seconds (6"). */
         int degrees = (int) decDegrees;
-        int minutes = (int) (60 * (decDegrees - degrees));
-        int seconds = (int) (3600 * (decDegrees - degrees - (minutes / 60)));
+        decDegrees = (decDegrees - degrees) * 60.0;
+        int minutes = (int) decDegrees;
+        decDegrees = (decDegrees - minutes) * 60.0;
+        int seconds = (int) decDegrees;
 
         return String.format("%03d° %02d’ %02d’’ %s", degrees, minutes, seconds,
                 compass);
