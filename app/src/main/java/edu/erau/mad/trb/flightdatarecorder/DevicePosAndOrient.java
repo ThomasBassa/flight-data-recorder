@@ -23,24 +23,24 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     private static final String LOC_PROVIDER = LocationManager.GPS_PROVIDER;
 
     //Sensors
-    private SensorManager sensorManager;
+    private final SensorManager sensorManager;
     private Sensor senseMag = null;
     private Sensor senseAccel = null;
 
-    private float[] rotationMatrix = new float[9];
+    private final float[] rotationMatrix = new float[9];
     private float[] magValues = null;
     private float[] accelValues = null;
 
     /** This array holds the final orientation values, in azimuth, pitch,
      * and roll order */
-    private float[] orientValues = new float[3];
+    private final float[] orientValues = new float[3];
 
     /** Track whether the device has the sensors required for orientation.
      * Assume false until the sensors have been retrieved from the SensorManager */
     private boolean sensorsPresent = false;
 
     //Location
-    private LocationManager locationManager;
+    private final LocationManager locationManager;
 
     private double lati = 0.0;
     private double longi = 0.0;

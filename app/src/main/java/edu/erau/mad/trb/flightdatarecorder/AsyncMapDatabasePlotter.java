@@ -19,16 +19,16 @@ public class AsyncMapDatabasePlotter extends AsyncTask<Void, LatLng,
         ArrayList<LatLng>> {
     // https://developer.android.com/reference/android/os/AsyncTask.html
 
-    private FlightLogDatabase database;
+    private final FlightLogDatabase database;
 
-    private long flightID;
-    private GoogleMap map;
+    private final long flightID;
+    private final GoogleMap map;
 
-    private ArrayList<LatLng> coords = new ArrayList<>();
+    private final ArrayList<LatLng> coords = new ArrayList<>();
 
     private LatLngBounds bounds;
 
-    private Semaphore mapWait = new Semaphore(0);
+    private final Semaphore mapWait = new Semaphore(0);
 
     public AsyncMapDatabasePlotter(long id, GoogleMap googleMap, Context c) {
         flightID = id;
@@ -43,13 +43,6 @@ public class AsyncMapDatabasePlotter extends AsyncTask<Void, LatLng,
         });
 
         database = FlightLogDatabase.getInstance(c);
-    }
-
-    //Runs on UI thread before task begins
-    @Override
-    protected void onPreExecute() {
-        super.onPreExecute();
-        //TODO Show loading screen?
     }
 
     //The actual background task itself, runs on its own thread
