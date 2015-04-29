@@ -1,4 +1,8 @@
 package edu.erau.mad.trb.flightdatarecorder;
+/* FlightLogDatabase.java
+ * SE395A Final Project
+ * by Thomas Bassa
+ * A Java class to handle the storage of flight data in a database. */
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -8,8 +12,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-
-import java.util.Random;
 
 /** Database class for the storage of all flight data. Utilizes the
  * SQLiteOpenHelper to accomplish the management of the database. */
@@ -80,8 +82,7 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
      * @param context an Android context object to associate the database with
      *                if not created yet; an application context will be
      *                obtained from this.
-     * @return the only instance of a FlightLogDatabase that will exist
-     */
+     * @return the only instance of a FlightLogDatabase that will exist */
     public static FlightLogDatabase getInstance(Context context) {
         if(instance == null) {
             instance = new FlightLogDatabase(context.getApplicationContext());
@@ -112,7 +113,11 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         return db.rawQuery(query, null);
     }
 
-    //TODO Document me
+    /** Get the real-world start time of a flight with the given id,
+     * using a given database connection to perform the query.
+     * @param db the database to query (from an earlier call to get*Database)
+     * @param id the Flight ID to determine the start time of
+     * @return a unix time, in milliseconds, representing when the flight started */
     private long getFlightStart(SQLiteDatabase db, long id) {
         final String query = String.format("SELECT %s FROM %s WHERE %s=%d",
                 COL_START_REAL,
@@ -137,21 +142,39 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         return db.rawQuery(query, null);
     }
 
+    /** Initiate a new flight log, and get a database object to be used with
+     * future queries to {@link #logFlightData(android.database.sqlite.SQLiteDatabase, DevicePosAndOrient, long)}
+     * and {@link #concludeLogging(android.database.sqlite.SQLiteDatabase, DevicePosAndOrient, long)}
+     * @param realStartMillis the Unix start time, in milliseconds, of this flight
+     * @return a database object for use by other FlightLogDatabase methods
+     * @throws RuntimeException if called more than once in sequence without
+     * calling concludeLogging afterward */
     public SQLiteDatabase openLoggingDBConnection(long realStartMillis) {
         if(lastIDvalid) throw new RuntimeException("Opened new connection " +
                 "without closing the old one!");
-        Log.e("Database", "Start!");
+
         SQLiteDatabase db = getWritableDatabase();
 
         ContentValues values = new ContentValues(1);
         values.put(COL_START_REAL, realStartMillis);
 
+        /* This is a somewhat hacky multiple-return technique. Since the ID is
+        intentionally not specified by anyone (SQLite generates it for us) and
+        cannot also be returned to the caller, it is stored in a class field
+        along with a flag to state its validity. This ID is then used in
+        logFlightData and concludeLogging. */
         lastNewID = db.insert(TABLE_FLIGHT_LIST, null, values);
         lastIDvalid = true;
 
         return db;
     }
 
+    /** Log a set of flight data using the provided inputs.
+     * @param db a SQLiteDatabase to maintain continuity between logs
+     * @param posAndOrient the position/orientation data to log
+     * @param deltaTmillis the amount of time passed since the last log
+     * @throws RuntimeException if called without a corresponding call to
+     * openLoggingDBConnection first */
     public void logFlightData(SQLiteDatabase db, DevicePosAndOrient posAndOrient,
                               long deltaTmillis) {
         ContentValues values = new ContentValues(8);
@@ -173,9 +196,20 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         db.insert(TABLE_FLIGHT_DATA, null, values);
     }
 
+    /** Finalize a set of log data with the provided inputs.
+     * @param db a SQLiteDatabase to maintain continuity between logs
+     * @param posAndOrient the position/orientation data to log
+     * @param deltaTmillis the amount of time passed since the last log
+     * @throws RuntimeException if called without a corresponding call to
+     * openLoggingDBConnection first */
     public void concludeLogging(SQLiteDatabase db, DevicePosAndOrient posAndOrient,
                                 long deltaTmillis) {
         logFlightData(db, posAndOrient, deltaTmillis);
+
+        /* For some reason, LoggingService is able to call this after the call
+         to reset() even though it is killed as part of the delete-all sequence.
+         The try/catch block catches the exception thrown on the first line in
+         the event this happens; everything turns out well enough. */
         try {
             final long start = getFlightStart(db, lastNewID);
             final long end = start + deltaTmillis;
@@ -190,6 +224,7 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         db.close();
     }
 
+    /** Reset the database, clearing all stored data */
     public void reset() {
         onUpgrade(getWritableDatabase(), 0, 0);
     }
@@ -220,7 +255,7 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
                 "UNIQUE(" + COL_FLIGHT_ID + ", " + COL_DELTA_T_MS + "));";
         db.execSQL(create);
 
-        //TODO remove temporary testing inserts
+        /* Temporary testing inserts for new DBs
         ContentValues listRow = new ContentValues(2);
         final long now = System.currentTimeMillis();
         //From 100s ago to 25s ago, delta 75s
@@ -236,7 +271,7 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         db.insert(TABLE_FLIGHT_LIST, null, listRow);
 
         ContentValues dataRow = new ContentValues(7);
-        final Random gen = new Random();
+        final java.util.Random gen = new java.util.Random();
         final double baseLati = gen.nextDouble() * 25.0;
         final double baseLongi = gen.nextDouble() * 25.0;
         dataRow.put(COL_FLIGHT_ID, 1);
@@ -268,11 +303,12 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
 
             db.insert(TABLE_FLIGHT_DATA, null, dataRow);
         }
-        //End of temporary inserts.
-        //db.close();
+        //End of temporary inserts. */
     }
 
-    /* Called when the database schema increases in version number */
+    /* Called when the database schema increases in version number. Currently
+    just resets the entire database schema by dropping all tables and
+    invoking onCreate. */
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         //Nuke everything.
