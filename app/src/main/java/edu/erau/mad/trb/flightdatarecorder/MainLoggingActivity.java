@@ -16,9 +16,11 @@ import java.util.concurrent.TimeUnit;
 
 //TODO MainLoggingActivity documentation pass
 public class MainLoggingActivity extends ActionBarActivity
-        implements CompoundButton.OnCheckedChangeListener, ServiceConnection {
+        implements CompoundButton.OnCheckedChangeListener, ServiceConnection,
+        LoggingService.LogUpdateInterface {
     //TODO maybe make the MainLoggingActivity layouts less crappy
 
+    private Intent serviceIntent;
     //Views
     private TextView clock;
 
@@ -38,6 +40,8 @@ public class MainLoggingActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_logging);
 
+        serviceIntent = new Intent(this, LoggingService.class);
+
         clock = (TextView) findViewById(R.id.clock);
 
         startStopButton = (ToggleButton) findViewById(R.id.startStopButton);
@@ -55,9 +59,6 @@ public class MainLoggingActivity extends ActionBarActivity
     @Override
     protected void onStart() {
         super.onStart();
-        //TODO temporary update test...
-        //updateFieldData(new DevicePosAndOrient(this));
-        //updateClock(91619000);
     }
 
     protected void onResume() {
@@ -74,6 +75,7 @@ public class MainLoggingActivity extends ActionBarActivity
 
     //TODO override more lifecycle methods-- attach to the service, etc.
 
+    @Override
     public void updateFieldData(DevicePosAndOrient data) {
         dispRoll.setText(DevicePosAndOrient.formatDegValue(data.getRoll()));
         dispPitch.setText(DevicePosAndOrient.formatDegValue(data.getPitch()));
@@ -84,6 +86,7 @@ public class MainLoggingActivity extends ActionBarActivity
         dispAlt.setText(data.getNiceAltitude());
     }
 
+    @Override
     public void updateClock(long deltaT) {
         // http://stackoverflow.com/questions/625433/how-to-convert-milliseconds-to-x-mins-x-seconds-in-java
         long hours = TimeUnit.MILLISECONDS.toHours(deltaT);
@@ -95,30 +98,24 @@ public class MainLoggingActivity extends ActionBarActivity
         clock.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
     }
 
-    public void servicePing(View view) {
-        if(service != null) {
-            int pow = service.getNumPows();
-            Toast.makeText(this, "Pows: " + pow, Toast.LENGTH_SHORT).show();
-        }
-    }
-
     public void startLogging() {
-        final Intent serviceIntent = new Intent(this, LoggingService.class);
         startService(serviceIntent);
         bindService(serviceIntent, this, BIND_IMPORTANT);
     }
 
     public void stopLogging() {
         if(service != null) {
-            stopService(new Intent(this, LoggingService.class));
+            service.unregisterListener(this);
             unbindService(this);
+            stopService(serviceIntent);
             service = null;
         }
     }
 
     @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
-        this.service = ((LoggingService.LoggingBinder) service).getService();
+    public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
+        service = ((LoggingService.LoggingBinder) serviceBinder).getService();
+        service.registerListener(this);
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import java.util.Random;
 
@@ -66,9 +67,13 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
     /** The time this flight ended, as a Unix timestamp in milliseconds */
     public final static String COL_END_REAL = "endTimeUnixMillis";
 
-
     /** The saved instance of the FlightLogDatabase; used for singleton pattern */
     private static FlightLogDatabase instance;
+
+    /** The last ID of a newly created flight, from openLoggingDBConnection */
+    private long lastNewID;
+    /** Whether the value of lastNewID is valid */
+    private boolean lastIDvalid = false;
 
     /** Get the only FlightLogDatabase object, or make one if it doesn't exist.
      * @param context an Android context object to associate the database with
@@ -96,22 +101,23 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         //Essentially SELECT * FROM flightList ORDER BY start DESC with some renaming
         final String query = String.format("SELECT %s AS %s, %s, %s FROM %s " +
-                        "ORDER BY %s DESC",
+                        "WHERE %s NOT NULL ORDER BY %s DESC",
                 COL_FLIGHT_ID, COL_FLIGHT_ID_ALIAS,
                 COL_START_REAL, COL_END_REAL,
                 TABLE_FLIGHT_LIST,
+                COL_END_REAL,
                 COL_START_REAL);
 
         return db.rawQuery(query, null);
     }
 
-    //TODO Temporary method to test list ID callbacks.
-    public long getFlightStart(long id) {
+    //TODO Document me
+    private long getFlightStart(SQLiteDatabase db, long id) {
         final String query = String.format("SELECT %s FROM %s WHERE %s=%d",
                 COL_START_REAL,
                 TABLE_FLIGHT_LIST,
                 COL_FLIGHT_ID, id);
-        return DatabaseUtils.longForQuery(getReadableDatabase(), query, null);
+        return DatabaseUtils.longForQuery(db, query, null);
     }
 
     /** Get a Cursor for all latitudes, longitudes, and delta times associated
@@ -130,7 +136,56 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         return db.rawQuery(query, null);
     }
 
-    //TODO update database mechanism (devicepos&orient object?)
+    public SQLiteDatabase openLoggingDBConnection(long realStartMillis) {
+        if(lastIDvalid) throw new RuntimeException("Opened new connection " +
+                "without closing the old one!");
+        Log.e("Database", "Start!");
+        SQLiteDatabase db = getWritableDatabase();
+
+        ContentValues values = new ContentValues(1);
+        values.put(COL_START_REAL, realStartMillis);
+
+        lastNewID = db.insert(TABLE_FLIGHT_LIST, null, values);
+        lastIDvalid = true;
+
+        return db;
+    }
+
+    public void logFlightData(SQLiteDatabase db, DevicePosAndOrient posAndOrient,
+                              long deltaTmillis) {
+        ContentValues values = new ContentValues(8);
+
+        if(!lastIDvalid) throw new RuntimeException("Connection was not opened " +
+                "with openLoggingDBConnection!");
+
+        values.put(COL_FLIGHT_ID, lastNewID);
+        values.put(COL_DELTA_T_MS, deltaTmillis);
+
+        values.put(COL_ROLL, posAndOrient.getRoll());
+        values.put(COL_PITCH, posAndOrient.getPitch());
+        values.put(COL_YAW, posAndOrient.getAz());
+
+        values.put(COL_LATI, posAndOrient.getLatitude());
+        values.put(COL_LONGI, posAndOrient.getLongitude());
+        values.put(COL_ALT, posAndOrient.getAltitude());
+
+        db.insert(TABLE_FLIGHT_DATA, null, values);
+    }
+
+    public void concludeLogging(SQLiteDatabase db, DevicePosAndOrient posAndOrient,
+                                long deltaTmillis) {
+        logFlightData(db, posAndOrient, deltaTmillis);
+        final long start = getFlightStart(db, lastNewID);
+        final long end = start + deltaTmillis;
+        Log.e("Database", String.format("End %d == %tc", end, end));
+        ContentValues values = new ContentValues(1);
+        values.put(COL_END_REAL, end);
+
+        db.update(TABLE_FLIGHT_LIST, values, COL_FLIGHT_ID + "=" + lastNewID, null);
+
+        lastIDvalid = false;
+        db.close();
+    }
 
     public void reset() {
         onUpgrade(getWritableDatabase(), 0, 0);
@@ -211,6 +266,7 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
             db.insert(TABLE_FLIGHT_DATA, null, dataRow);
         }
         //End of temporary inserts.
+        db.close();
     }
 
     /* Called when the database schema increases in version number */

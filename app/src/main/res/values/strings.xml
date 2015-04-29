@@ -3,6 +3,7 @@
 
     <string name="start">Start Logging</string>
     <string name="stop">Stop Logging</string>
+    <string name="viewHistory">View History</string>
 
     <string name="zeroTime" translatable="false">00:00:00</string>
     <string name="zeroDeg" translatable="false">   0.00°</string>
@@ -29,6 +30,8 @@
     <string name="dialogDeleteMessage">This will erase all of your flight records.</string>
     <string name="historyErased">Flight history cleared.</string>
     <string name="dialogDeleteTitle">Reset flight history?</string>
-    <string name="viewHistory">View History</string>
+
+    <string name="loggingInProgress">Logging is in progress. Touch to see data or stop.</string>
+    <string name="loggingNotificationTitle">Flight Data Recording</string>
 
 </resources>
