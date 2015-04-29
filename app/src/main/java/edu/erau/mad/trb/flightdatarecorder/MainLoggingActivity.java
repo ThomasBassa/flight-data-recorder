@@ -17,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 public class MainLoggingActivity extends ActionBarActivity
         implements View.OnClickListener, ServiceConnection,
         LoggingService.LogUpdateInterface {
-    //TODO maybe make the MainLoggingActivity layouts less crappy
 
     private Intent serviceIntent;
     //Views

@@ -92,7 +92,7 @@ public class AsyncMapDatabasePlotter extends AsyncTask<Void, LatLng,
     //Runs on UI thread after task completes
     @Override
     protected void onPostExecute(ArrayList<LatLng> latLngs) {
-        //TODO consider centering on the bounds prior to this somehow
+        //TO-DO consider centering on the bounds prior to this somehow
         map.addPolyline(new PolylineOptions().addAll(latLngs).width(3.0f));
         //20 is the # pixels padding; arbitrary
         map.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 20));

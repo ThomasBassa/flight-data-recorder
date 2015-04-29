@@ -10,7 +10,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 //TODO Document FlightDetailActivity
 public class FlightDetailActivity extends FragmentActivity {
 
-    //TODO Maybe add an action bar + menu items...
     public static final String INTENT_ID_INFO = "edu.erau.mad.trb" +
             ".flightdatarecorder.INTENT_FLIGHTID";
 

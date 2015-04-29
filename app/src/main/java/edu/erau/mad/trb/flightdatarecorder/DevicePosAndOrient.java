@@ -220,7 +220,6 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     @Override
     public void onStatusChanged(String provider, int status, Bundle extras) {}
 
-    //TODO should probably account for provider enable/disable...
     @Override
     public void onProviderEnabled(String provider) {}
 

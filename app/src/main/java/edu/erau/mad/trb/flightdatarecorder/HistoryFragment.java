@@ -56,10 +56,10 @@ public class HistoryFragment extends ListFragment implements
 
     */
 
-    //TODO implement multiple selection lists for delete & export
+    //TO-DO implement multiple selection lists for delete & export
 
     //Fragment lifecycle methods
-    //TODO close the cursors you're using, with lifecycle methods
+    //TO-DO close the cursors you're using, with lifecycle methods
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
@@ -79,7 +79,7 @@ public class HistoryFragment extends ListFragment implements
         Cursor flightsCursor = database.getAllFlights();
         final String[] fromCols = {FlightLogDatabase.COL_START_REAL,
                 FlightLogDatabase.COL_END_REAL};
-        //TODO Implement a better layout, multiple selection layout
+        //TO-DO Implement a better layout, multiple selection layout
         final int[] toViews = {android.R.id.text1, android.R.id.text2};
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.two_line_list_item, flightsCursor, fromCols, toViews, 0);
