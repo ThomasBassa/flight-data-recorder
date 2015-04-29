@@ -1,4 +1,8 @@
 package edu.erau.mad.trb.flightdatarecorder;
+/* MainLoggingActivity.java
+ * SE395A Final Project
+ * by Thomas Bassa
+ * A Java class to handle entry point of the app, and logging display. */
 
 import android.content.ComponentName;
 import android.content.Intent;
@@ -6,19 +10,21 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.util.concurrent.TimeUnit;
 
-//TODO MainLoggingActivity documentation pass
+/** An Activity to serve as the entry point of the Flight Data Recorder and
+ * show its main logging functionality. */
 public class MainLoggingActivity extends ActionBarActivity
         implements View.OnClickListener, ServiceConnection,
         LoggingService.LogUpdateInterface {
 
+    //Maps to start a LoggingService (to avoid a bunch of redundant new Intent())
     private Intent serviceIntent;
+
     //Views
     private TextView clock;
 
@@ -31,8 +37,11 @@ public class MainLoggingActivity extends ActionBarActivity
     private TextView dispLongi;
     private TextView dispAlt;
 
+    /** Direct connection to a LoggingService; non-null after successful
+     * starting AND binding. */
     private LoggingService service;
 
+    //Called when activity created. Connects XML views to this class.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,26 +63,25 @@ public class MainLoggingActivity extends ActionBarActivity
         startStopButton.setOnClickListener(this);
     }
 
+    //On activity resume, attempt to bind with the LoggingService for UI updates
     @Override
     protected void onResume() {
         super.onResume();
-        Log.e("LogActivity", "Resume. Attempt bind.");
         bindService(serviceIntent, this, BIND_AUTO_CREATE);
     }
 
+    //On activity pause, unbind from the LoggingService if bound
     @Override
     protected void onPause() {
         super.onPause();
-        Log.e("LogActivity", "Pause. Attempt disconnect.");
         if(service != null) {
-            Log.e("LogActivity", "> Disconnecting...");
             service.unregisterListener(this);
             unbindService(this);
-        } else {
-            Log.e("LogActivity", "> Service not alive.");
         }
     }
 
+    //Implementation of LogUpdateInterface
+    //Update the position and orientation fields
     @Override
     public void updateFieldData(DevicePosAndOrient data) {
         dispRoll.setText(DevicePosAndOrient.formatDegValue(data.getRoll()));
@@ -85,6 +93,8 @@ public class MainLoggingActivity extends ActionBarActivity
         dispAlt.setText(data.getNiceAltitude());
     }
 
+    //Update the clock in HH:MM:SS format from a delta-t
+    // e.g. a counter/stopwatch time, not clock time
     @Override
     public void updateClock(long deltaT) {
         // http://stackoverflow.com/questions/625433/how-to-convert-milliseconds-to-x-mins-x-seconds-in-java
@@ -97,11 +107,13 @@ public class MainLoggingActivity extends ActionBarActivity
         clock.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
     }
 
+    /** Initiate a new LoggingService and bind to it (called on toggle button press) */
     public void startLogging() {
         startService(serviceIntent);
         bindService(serviceIntent, this, BIND_AUTO_CREATE);
     }
 
+    /** Unbind from the LoggingService and stop it (called on toggle button press) */
     public void stopLogging() {
         if(service != null) {
             unbindService(this);
@@ -110,16 +122,23 @@ public class MainLoggingActivity extends ActionBarActivity
         }
     }
 
+    //This is called upon attempting to bind with bindService.
     @Override
     public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
-        Log.e("LogActivity", "Trying to bind to service.");
+        //Get the LoggingService out of the binder
         service = ((LoggingService.LoggingBinder) serviceBinder).getService();
+
+        //If it was null, the service was NOT previously started.
         if(service != null) {
-            Log.e("LogActivity", "> Found. Registering...");
+            //We bound to the LoggingService after it started; get updates
             service.registerListener(this);
+            //Ensure the toggle button is turned on (logging is active)
             startStopButton.setChecked(true);
         } else {
+            //Service was brought to life just for binding; kill it
             unbindService(this);
+
+            //Reset the state of the UI (since no logging is happening)
             startStopButton.setChecked(false);
 
             clock.setText(R.string.zeroTime);
@@ -132,6 +151,7 @@ public class MainLoggingActivity extends ActionBarActivity
         }
     }
 
+    //The service was accidentally killed. onServiceConnected will rebind it.
     @Override
     public void onServiceDisconnected(ComponentName name) {
         service = null;
@@ -143,8 +163,12 @@ public class MainLoggingActivity extends ActionBarActivity
         startActivity(startHist);
     }
 
+    //The onClickListener for the ToggleButton.
+    //Used instead of onCheckedChangedListener because that reacted to setChecked.
+    //This is only called in response to user clicks.
     @Override
     public void onClick(View v) {
+        //Start or stop logging depending on the button state.
         if(startStopButton.isChecked()) startLogging();
         else stopLogging();
     }
