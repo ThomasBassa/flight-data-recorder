@@ -1,5 +1,5 @@
 package edu.erau.mad.trb.flightdatarecorder;
-/* DevicePosAndOrient.java
+/* AsyncMapDatabasePlotter.java
  * SE395A Final Project
  * by Thomas Bassa
  * A Java class to handle querying flight details asynchronously from loading

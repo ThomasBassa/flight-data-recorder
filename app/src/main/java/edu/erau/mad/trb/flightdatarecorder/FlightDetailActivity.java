@@ -1,5 +1,5 @@
 package edu.erau.mad.trb.flightdatarecorder;
-/* DevicePosAndOrient.java
+/* FlightDetailActivity.java
  * SE395A Final Project
  * by Thomas Bassa
  * A Java class to handle the display of flight details on a map. */
