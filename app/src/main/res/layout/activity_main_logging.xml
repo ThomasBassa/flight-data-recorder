@@ -27,6 +27,12 @@
         android:textOff="@string/start"
         android:textSize="@dimen/abc_text_size_medium_material"/>
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Test Service Bind"
+        android:onClick="servicePing"/>
+
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

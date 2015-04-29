@@ -2,12 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="edu.erau.mad.trb.flightdatarecorder" >
 
-    <!--Permissions-->
-    <!--Location is used for what should be obvious reasons-->
+    <!-- Permissions -->
+    <!-- Location is used for what should be obvious reasons -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
-    <!--Used for Google Maps API, nothing more.-->
+    <!-- Used for Google Maps API, nothing more. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
@@ -49,6 +49,12 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="edu.erau.mad.trb.flightdatarecorder.HistoryActivity" />
         </activity>
+
+        <service
+            android:name=".LoggingService"
+            android:enabled="true"
+            android:exported="false" >
+        </service>
     </application>
 
 </manifest>

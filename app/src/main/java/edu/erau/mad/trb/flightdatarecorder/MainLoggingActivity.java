@@ -1,16 +1,22 @@
 package edu.erau.mad.trb.flightdatarecorder;
 
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+import android.widget.CompoundButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.concurrent.TimeUnit;
 
 //TODO MainLoggingActivity documentation pass
-public class MainLoggingActivity extends ActionBarActivity {
+public class MainLoggingActivity extends ActionBarActivity
+        implements CompoundButton.OnCheckedChangeListener, ServiceConnection {
     //TODO maybe make the MainLoggingActivity layouts less crappy
 
     //Views
@@ -24,6 +30,8 @@ public class MainLoggingActivity extends ActionBarActivity {
     private TextView dispLati;
     private TextView dispLongi;
     private TextView dispAlt;
+
+    private LoggingService service;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +48,8 @@ public class MainLoggingActivity extends ActionBarActivity {
         dispLati = (TextView) findViewById(R.id.dispLati);
         dispLongi = (TextView) findViewById(R.id.dispLongi);
         dispAlt = (TextView) findViewById(R.id.dispAlt);
+
+        startStopButton.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -48,6 +58,18 @@ public class MainLoggingActivity extends ActionBarActivity {
         //TODO temporary update test...
         //updateFieldData(new DevicePosAndOrient(this));
         //updateClock(91619000);
+    }
+
+    protected void onResume() {
+        super.onResume();
+        if(startStopButton.isChecked()) {
+            startLogging();
+        }
+    }
+
+    protected void onPause() {
+        super.onPause();
+        stopLogging();
     }
 
     //TODO override more lifecycle methods-- attach to the service, etc.
@@ -71,6 +93,37 @@ public class MainLoggingActivity extends ActionBarActivity {
         long seconds = TimeUnit.MILLISECONDS.toSeconds(deltaT);
 
         clock.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+    }
+
+    public void servicePing(View view) {
+        if(service != null) {
+            int pow = service.getNumPows();
+            Toast.makeText(this, "Pows: " + pow, Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void startLogging() {
+        final Intent serviceIntent = new Intent(this, LoggingService.class);
+        startService(serviceIntent);
+        bindService(serviceIntent, this, BIND_IMPORTANT);
+    }
+
+    public void stopLogging() {
+        if(service != null) {
+            stopService(new Intent(this, LoggingService.class));
+            unbindService(this);
+            service = null;
+        }
+    }
+
+    @Override
+    public void onServiceConnected(ComponentName name, IBinder service) {
+        this.service = ((LoggingService.LoggingBinder) service).getService();
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName name) {
+        service = null;
     }
 
     //TODO does main actually need a menu?
@@ -102,5 +155,11 @@ public class MainLoggingActivity extends ActionBarActivity {
     public void goToHistory(View view) {
         Intent startHist = new Intent(this, HistoryActivity.class);
         startActivity(startHist);
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if(isChecked) startLogging();
+        else stopLogging();
     }
 }
