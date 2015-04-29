@@ -42,6 +42,7 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
 
     private double lati = 0.0;
     private double longi = 0.0;
+    private double altitude = 0.0;
 
     /** Create a DevicePosAndOrient object, using the Context to retrieve
      * system services (sensors, location) */
@@ -146,6 +147,11 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
         return Math.toDegrees(orientValues[2]);
     }
 
+    //TODO doc getAltitude
+    public double getAltitude() {
+        return altitude;
+    }
+
     /** Take a degrees value for roll/pitch/yaw and format it nicely. */
     public static String formatDegValue(double value) {
         return String.format("% 3.2f°", value);
@@ -193,6 +199,7 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     public void onLocationChanged(Location loc) {
         lati = loc.getLatitude();
         longi = loc.getLongitude();
+        altitude = loc.getAltitude();
     }
 
     //Don't care about the next 3 methods...
