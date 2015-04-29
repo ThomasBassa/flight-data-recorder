@@ -1,6 +1,5 @@
 package edu.erau.mad.trb.flightdatarecorder;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
@@ -94,18 +93,20 @@ public class LoggingService extends Service implements Runnable {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return serviceStarted ? binder : null;
+        return binder;
     }
 
     @Override
     public void onDestroy() {
-        serviceStarted = false;
-        posAndOrient.stopListening();
-        hThread.quit();
-        final long lastDeltaT = SystemClock.elapsedRealtime() - sysStartTime;
-        database.concludeLogging(dbConnection, posAndOrient, lastDeltaT);
-        unregisterAllListeners();
-        Log.e("LoggingService", "Service stop.");
+        if(serviceStarted) {
+            serviceStarted = false;
+            posAndOrient.stopListening();
+            hThread.quit();
+            final long lastDeltaT = SystemClock.elapsedRealtime() - sysStartTime;
+                database.concludeLogging(dbConnection, posAndOrient, lastDeltaT);
+            unregisterAllListeners();
+            Log.e("LoggingService", "Service stop.");
+        }
         super.onDestroy();
     }
 
@@ -146,7 +147,7 @@ public class LoggingService extends Service implements Runnable {
      * service directly, as long as we're in the same package + process. */
     public class LoggingBinder extends Binder {
         LoggingService getService() {
-            return LoggingService.this;
+            return serviceStarted ? LoggingService.this : null;
         }
     }
 

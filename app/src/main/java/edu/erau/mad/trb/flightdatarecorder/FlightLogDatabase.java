@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
@@ -175,13 +176,15 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
     public void concludeLogging(SQLiteDatabase db, DevicePosAndOrient posAndOrient,
                                 long deltaTmillis) {
         logFlightData(db, posAndOrient, deltaTmillis);
-        final long start = getFlightStart(db, lastNewID);
-        final long end = start + deltaTmillis;
-        Log.e("Database", String.format("End %d == %tc", end, end));
-        ContentValues values = new ContentValues(1);
-        values.put(COL_END_REAL, end);
+        try {
+            final long start = getFlightStart(db, lastNewID);
+            final long end = start + deltaTmillis;
+            Log.e("Database", String.format("End %d == %tc", end, end));
+            ContentValues values = new ContentValues(1);
+            values.put(COL_END_REAL, end);
 
-        db.update(TABLE_FLIGHT_LIST, values, COL_FLIGHT_ID + "=" + lastNewID, null);
+            db.update(TABLE_FLIGHT_LIST, values, COL_FLIGHT_ID + "=" + lastNewID, null);
+        } catch (SQLiteDoneException ignored) {}
 
         lastIDvalid = false;
         db.close();
@@ -266,7 +269,7 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
             db.insert(TABLE_FLIGHT_DATA, null, dataRow);
         }
         //End of temporary inserts.
-        db.close();
+        //db.close();
     }
 
     /* Called when the database schema increases in version number */

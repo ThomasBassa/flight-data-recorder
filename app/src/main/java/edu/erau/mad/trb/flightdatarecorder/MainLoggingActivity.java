@@ -6,17 +6,16 @@ import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.View;
-import android.widget.CompoundButton;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import java.util.concurrent.TimeUnit;
 
 //TODO MainLoggingActivity documentation pass
 public class MainLoggingActivity extends ActionBarActivity
-        implements CompoundButton.OnCheckedChangeListener, ServiceConnection,
+        implements View.OnClickListener, ServiceConnection,
         LoggingService.LogUpdateInterface {
     //TODO maybe make the MainLoggingActivity layouts less crappy
 
@@ -53,27 +52,28 @@ public class MainLoggingActivity extends ActionBarActivity
         dispLongi = (TextView) findViewById(R.id.dispLongi);
         dispAlt = (TextView) findViewById(R.id.dispAlt);
 
-        startStopButton.setOnCheckedChangeListener(this);
+        startStopButton.setOnClickListener(this);
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
     protected void onResume() {
         super.onResume();
-        if(startStopButton.isChecked()) {
-            startLogging();
-        }
+        Log.e("LogActivity", "Resume. Attempt bind.");
+        bindService(serviceIntent, this, BIND_AUTO_CREATE);
     }
 
+    @Override
     protected void onPause() {
         super.onPause();
-        stopLogging();
+        Log.e("LogActivity", "Pause. Attempt disconnect.");
+        if(service != null) {
+            Log.e("LogActivity", "> Disconnecting...");
+            service.unregisterListener(this);
+            unbindService(this);
+        } else {
+            Log.e("LogActivity", "> Service not alive.");
+        }
     }
-
-    //TODO override more lifecycle methods-- attach to the service, etc.
 
     @Override
     public void updateFieldData(DevicePosAndOrient data) {
@@ -100,12 +100,11 @@ public class MainLoggingActivity extends ActionBarActivity
 
     public void startLogging() {
         startService(serviceIntent);
-        bindService(serviceIntent, this, BIND_IMPORTANT);
+        bindService(serviceIntent, this, BIND_AUTO_CREATE);
     }
 
     public void stopLogging() {
         if(service != null) {
-            service.unregisterListener(this);
             unbindService(this);
             stopService(serviceIntent);
             service = null;
@@ -114,8 +113,24 @@ public class MainLoggingActivity extends ActionBarActivity
 
     @Override
     public void onServiceConnected(ComponentName name, IBinder serviceBinder) {
+        Log.e("LogActivity", "Trying to bind to service.");
         service = ((LoggingService.LoggingBinder) serviceBinder).getService();
-        service.registerListener(this);
+        if(service != null) {
+            Log.e("LogActivity", "> Found. Registering...");
+            service.registerListener(this);
+            startStopButton.setChecked(true);
+        } else {
+            unbindService(this);
+            startStopButton.setChecked(false);
+
+            clock.setText(R.string.zeroTime);
+            dispRoll.setText(R.string.zeroDeg);
+            dispPitch.setText(R.string.zeroDeg);
+            dispYaw.setText(R.string.zeroDeg);
+            dispLati.setText(R.string.zeroCoord);
+            dispLongi.setText(R.string.zeroCoord);
+            dispAlt.setText(R.string.zeroFt);
+        }
     }
 
     @Override
@@ -130,8 +145,8 @@ public class MainLoggingActivity extends ActionBarActivity
     }
 
     @Override
-    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        if(isChecked) startLogging();
+    public void onClick(View v) {
+        if(startStopButton.isChecked()) startLogging();
         else stopLogging();
     }
 }

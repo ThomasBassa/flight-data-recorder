@@ -52,11 +52,11 @@ public class HistoryActivity extends ActionBarActivity implements
                 dialogBuilder.setPositiveButton(R.string.dialogWipe, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        //If confirmed, do it; kill the activity too
+                        //If confirmed, do it; kill the service and activity too
+                        stopService(new Intent(HistoryActivity.this, LoggingService.class));
                         database.reset();
-                        Toast.makeText(HistoryActivity.this,
-                                R.string.historyErased,
-                                Toast.LENGTH_SHORT).show();
+                        Toast.makeText(HistoryActivity.this, R.string.historyErased,
+                                Toast.LENGTH_LONG).show();
                         finish();
                     }
                 })
