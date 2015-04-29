@@ -4,11 +4,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.View;
+
 //TODO MainLoggingActivity documentation pass
 public class MainLoggingActivity extends ActionBarActivity {
-    //TODO Improve the UI of MainLoggingActivity; involve a fragment maybe
-    //TODO account for landscape orientation in MainLoggingActivity
-
+    //TODO maybe make the MainLoggingActivity layouts less crappy
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
