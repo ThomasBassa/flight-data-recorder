@@ -31,6 +31,8 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     private float[] magValues = null;
     private float[] accelValues = null;
 
+    /** This array holds the final orientation values, in azimuth, pitch,
+     * and roll order */
     private float[] orientValues = new float[3];
 
     /** Track whether the device has the sensors required for orientation.
@@ -150,6 +152,10 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     //TODO doc getAltitude
     public double getAltitude() {
         return altitude;
+    }
+
+    public String getNiceAltitude() {
+        return String.format("%2.2f ft.", altitude);
     }
 
     /** Take a degrees value for roll/pitch/yaw and format it nicely. */
