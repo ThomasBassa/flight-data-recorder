@@ -11,7 +11,6 @@ import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDoneException;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
 
 /** Database class for the storage of all flight data. Utilizes the
  * SQLiteOpenHelper to accomplish the management of the database. */
@@ -213,7 +212,6 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         try {
             final long start = getFlightStart(db, lastNewID);
             final long end = start + deltaTmillis;
-            Log.e("Database", String.format("End %d == %tc", end, end));
             ContentValues values = new ContentValues(1);
             values.put(COL_END_REAL, end);
 
