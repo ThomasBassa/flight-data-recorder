@@ -4,7 +4,7 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
 
-    <string name="zeroTime">00:00:00</string>
+    <string name="zeroTime" translatable="false">00:00:00</string>
 
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
@@ -20,4 +20,10 @@
 
     <string name="noHistory">No flights recorded yet.</string>
     <string name="title_activity_flight_detail">Flight Path</string>
+
+    <string name="dialogWipe">Reset</string>
+    <string name="dialogCancel">Cancel</string>
+    <string name="dialogDeleteMessage">This will erase all of your flight records.</string>
+    <string name="historyErased">Flight history cleared.</string>
+    <string name="dialogDeleteTitle">Reset flight history?</string>
 </resources>

@@ -1,5 +1,7 @@
 package edu.erau.mad.trb.flightdatarecorder;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -13,13 +15,14 @@ public class HistoryActivity extends ActionBarActivity implements
 
     private FlightLogDatabase database;
 
-    //TODO handle to its contained HistoryFragment
+    private HistoryFragment histFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_history);
         database = FlightLogDatabase.getInstance(this);
+        histFrag = (HistoryFragment) getFragmentManager().findFragmentById(R.id.histFrag);
     }
 
 
@@ -43,11 +46,25 @@ public class HistoryActivity extends ActionBarActivity implements
                 return true;
             //TODO case for "delete some"
             case R.id.action_delete_all:
-                //TODO Reset the database
+                //Reset the database
                 //Pop dialog to confirm database wipe
-                //If confirmed, do it
-                Toast.makeText(this, "Delete all will be implemented.",
-                        Toast.LENGTH_SHORT).show();
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+                dialogBuilder.setPositiveButton(R.string.dialogWipe, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //If confirmed, do it; kill the activity too
+                        database.reset();
+                        Toast.makeText(HistoryActivity.this,
+                                R.string.historyErased,
+                                Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .setNegativeButton(R.string.dialogCancel, null)
+                .setMessage(R.string.dialogDeleteMessage)
+                .setCancelable(false)
+                .setTitle(R.string.dialogDeleteTitle)
+                .show();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

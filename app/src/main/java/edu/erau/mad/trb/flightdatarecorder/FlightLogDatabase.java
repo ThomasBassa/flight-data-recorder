@@ -132,6 +132,10 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
 
     //TODO update database mechanism (devicepos&orient object?)
 
+    public void reset() {
+        onUpgrade(getWritableDatabase(), 0, 0);
+    }
+
     /* Called when the database is created for the first time. */
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -221,5 +225,4 @@ public class FlightLogDatabase extends SQLiteOpenHelper {
         //And recreate the entire database
         onCreate(db);
     }
-
 }
