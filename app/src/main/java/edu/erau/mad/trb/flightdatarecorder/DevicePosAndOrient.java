@@ -90,27 +90,14 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
     /** Get a formatted numeric string with the latitude,
      * referencing north or south rather than a sign. */
     public String getNiceLatitude() {
-        return formatLatitude(lati);
+        String latiCompass = lati >= 0.0 ? "N" : "S";
+        return formatDecDegToDegMinSec(Math.abs(lati), latiCompass);
     }
 
     /** Get a formatted numeric string with the longitude,
      * referencing east or west rather than a sign. */
     public String getNiceLongitude() {
-        return formatLongitude(longi);
-    }
-
-    /** Format a latitude in ddd° mm’ ss’’ C format,
-     * aka degrees, minutes, and seconds, with a compass letter. */
-    public String formatLatitude(double lati) {
-        String latiCompass = lati >= 0f ? "N" : "S";
-        return formatDecDegToDegMinSec(Math.abs(lati), latiCompass);
-    }
-
-
-    /** Format a longitude in ddd° mm’ ss’’ C format,
-     * aka degrees, minutes, and seconds, with a compass letter. */
-    public String formatLongitude(double longi) {
-        String longiCompass = longi >= 0f ? "E" : "W";
+        String longiCompass = longi >= 0.0 ? "E" : "W";
         return formatDecDegToDegMinSec(Math.abs(longi), longiCompass);
     }
 
@@ -157,13 +144,15 @@ public class DevicePosAndOrient implements SensorEventListener, LocationListener
         return Math.toDegrees(orientValues[2]);
     }
 
-    //TODO doc getAltitude
+    /** Get the altitude of the device, in feet above sea level */
     public double getAltitude() {
-        return altitude;
+        //The stored altitude is in meters-- there are 3.281 ft/m
+        return altitude * 3.281;
     }
 
+    /** Get a formatted string with the altitude in feet. */
     public String getNiceAltitude() {
-        return String.format("%2.2f ft.", altitude);
+        return String.format("%2.2f ft.", getAltitude());
     }
 
     /** Take a degrees value for roll/pitch/yaw and format it nicely. */
